@@ -100,19 +100,19 @@ const findAll = async () => {
   const nameSet = keyGenerator.getSiteIDsKey()
   // START CHALLENGE #1
   const allSitesKey = await client.smembersAsync(nameSet);
-  if(allSitesKey.length > 0) {
-    const res = await client.mgetAsync(allSitesKey)
-    console.log("🚀", res)
-  }
   console.log("🚀 allSitesKey:", allSitesKey)
   
+  if(!allSitesKey || allSitesKey.length === 0 ) return allSitesKey
 
+  const res = await client.mgetAsync(...allSitesKey)
+  console.log("🚀res:", res)
 
+  const parsedSites = res
+    .map(value => (value !== null ? JSON.parse(value) : null))
+    .filter(value => value !== null);
 
+  console.log("parsedSites:", parsedSites);
   
-  // return await client.lrangeAsync(SiteIDsKey, 0, -1);
-  //ru102js:sites:ids"
-  // return []
   // END CHALLENGE #1
 };
 /* eslint-enable */
