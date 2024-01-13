@@ -99,7 +99,6 @@ const findAll = async () => {
   const client = redis.getClient()
 
   const siteIDsKey = await client.smembersAsync(keyGenerator.getSiteIDsKey());
-  console.log("🚀 ~ findAll ~ siteIDsKey:", siteIDsKey)
   const sites = []
 
   for (const siteKey of siteIDsKey) {
