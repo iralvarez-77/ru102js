@@ -96,22 +96,22 @@ const findById = async (id) => {
  * @returns {Promise} - a Promise, resolving to an array of site objects.
  */
 const findAll = async () => {
+  // START CHALLENGE #1
   const client = redis.getClient()
   const nameSet = keyGenerator.getSiteIDsKey()
-  // START CHALLENGE #1
   const allSitesKey = await client.smembersAsync(nameSet);
   console.log("🚀 allSitesKey:", allSitesKey)
+
+  if (!allSitesKey || allSitesKey.length === 0) {
+    return allSitesKey;
+  }
+
   
-  if(!allSitesKey || allSitesKey.length === 0 ) return allSitesKey
 
-  const res = await client.mgetAsync(...allSitesKey)
-  console.log("🚀res:", res)
+  // const res = await client.mgetAsync(allSitesKey)
+  // console.log("🚀 ~ findAll ~ res:", res)
 
-  const parsedSites = res
-    .map(value => (value !== null ? JSON.parse(value) : null))
-    .filter(value => value !== null);
-
-  console.log("parsedSites:", parsedSites);
+  // return allSitesKey
   
   // END CHALLENGE #1
 };
