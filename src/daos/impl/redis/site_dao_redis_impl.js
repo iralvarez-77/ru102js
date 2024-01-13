@@ -1,3 +1,4 @@
+const { all } = require('express/lib/application');
 const redis = require('./redis_client');
 const keyGenerator = require('./redis_key_generator');
 
@@ -95,8 +96,23 @@ const findById = async (id) => {
  * @returns {Promise} - a Promise, resolving to an array of site objects.
  */
 const findAll = async () => {
+  const client = redis.getClient()
+  const nameSet = keyGenerator.getSiteIDsKey()
   // START CHALLENGE #1
-  return [];
+  const allSitesKey = await client.smembersAsync(nameSet);
+  if(allSitesKey.length > 0) {
+    const res = await client.mgetAsync(allSitesKey)
+    console.log("🚀", res)
+  }
+  console.log("🚀 allSitesKey:", allSitesKey)
+  
+
+
+
+  
+  // return await client.lrangeAsync(SiteIDsKey, 0, -1);
+  //ru102js:sites:ids"
+  // return []
   // END CHALLENGE #1
 };
 /* eslint-enable */
