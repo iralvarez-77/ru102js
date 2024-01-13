@@ -1,4 +1,3 @@
-const { all } = require('express/lib/application');
 const redis = require('./redis_client');
 const keyGenerator = require('./redis_key_generator');
 
@@ -98,23 +97,21 @@ const findById = async (id) => {
 const findAll = async () => {
   // START CHALLENGE #1
   const client = redis.getClient()
-  const nameSet = keyGenerator.getSiteIDsKey()
-  const allSitesKey = await client.smembersAsync(nameSet);
-  console.log("🚀 allSitesKey:", allSitesKey)
 
-  if (!allSitesKey || allSitesKey.length === 0) {
-    return allSitesKey;
+  const siteIDsKey = await client.smembersAsync(keyGenerator.getSiteIDsKey());
+  console.log("🚀 ~ findAll ~ siteIDsKey:", siteIDsKey)
+  const sites = []
+
+  for (const siteKey of siteIDsKey) {
+    const siteHash = await client.hgetallAsync(siteKey)
+
+    if (siteHash) sites.push(remap(siteHash))
   }
 
-  
-
-  // const res = await client.mgetAsync(allSitesKey)
-  // console.log("🚀 ~ findAll ~ res:", res)
-
-  // return allSitesKey
-  
+  return sites  
   // END CHALLENGE #1
 };
+
 /* eslint-enable */
 
 /* eslint-disable no-unused-vars */
