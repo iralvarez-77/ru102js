@@ -2,6 +2,7 @@ const roundTo = require('round-to');
 const redis = require('./redis_client');
 const keyGenerator = require('./redis_key_generator');
 const timeUtils = require('../../../utils/time_utils');
+const { log } = require('console');
 
 const metricIntervalSeconds = 60;
 const metricsPerDay = metricIntervalSeconds * 24;
@@ -56,7 +57,11 @@ const insertMetric = async (siteId, metricValue, metricName, timestamp) => {
   const client = redis.getClient();
 
   const metricKey = keyGenerator.getDayMetricKey(siteId, metricName, timestamp);
+
   const minuteOfDay = timeUtils.getMinuteOfDay(timestamp);
+
+  const response =  await client.zaddAsync( metricKey, minuteOfDay, formatMeasurementMinute(metricValue, minuteOfDay))
+  // console.log("🚀 ~ insertMetric ~ response:", response)
 
   // START Challenge #2
   // END Challenge #2
