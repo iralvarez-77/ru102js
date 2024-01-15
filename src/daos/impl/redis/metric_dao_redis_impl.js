@@ -57,13 +57,11 @@ const insertMetric = async (siteId, metricValue, metricName, timestamp) => {
   const client = redis.getClient();
 
   const metricKey = keyGenerator.getDayMetricKey(siteId, metricName, timestamp);
-
   const minuteOfDay = timeUtils.getMinuteOfDay(timestamp);
-
   
   // START Challenge #2
-  await client.zaddAsync( metricKey, minuteOfDay, formatMeasurementMinute(metricValue, minuteOfDay))
-  await client.expireAsync(metricKey, metricExpirationSeconds)
+    await client.zaddAsync(metricKey, minuteOfDay, formatMeasurementMinute(metricValue, minuteOfDay))
+    await client.expireAsync(metricKey, metricExpirationSeconds)
   // END Challenge #2
 };
 /* eslint-enable */
