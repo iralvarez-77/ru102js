@@ -12,16 +12,26 @@ const weekSeconds = 60 * 60 * 24 * 7;
  * @param {Object} siteStatsHash - Object whose key/value pairs represent values from a Redis hash.
  * @private
  */
-const remap = (siteStatsHash) => {
-  const remappedSiteStatsHash = { ...siteStatsHash };
+const remap = siteStatsHash => {
+	const remappedSiteStatsHash = { ...siteStatsHash };
 
-  remappedSiteStatsHash.lastReportingTime = parseInt(siteStatsHash.lastReportingTime, 10);
-  remappedSiteStatsHash.meterReadingCount = parseInt(siteStatsHash.meterReadingCount, 10);
-  remappedSiteStatsHash.maxWhGenerated = parseFloat(siteStatsHash.maxWhGenerated);
-  remappedSiteStatsHash.minWhGenerated = parseFloat(siteStatsHash.minWhGenerated);
-  remappedSiteStatsHash.maxCapacity = parseFloat(siteStatsHash.maxCapacity);
+	remappedSiteStatsHash.lastReportingTime = parseInt(
+		siteStatsHash.lastReportingTime,
+		10
+	);
+	remappedSiteStatsHash.meterReadingCount = parseInt(
+		siteStatsHash.meterReadingCount,
+		10
+	);
+	remappedSiteStatsHash.maxWhGenerated = parseFloat(
+		siteStatsHash.maxWhGenerated
+	);
+	remappedSiteStatsHash.minWhGenerated = parseFloat(
+		siteStatsHash.minWhGenerated
+	);
+	remappedSiteStatsHash.maxCapacity = parseFloat(siteStatsHash.maxCapacity);
 
-  return remappedSiteStatsHash;
+	return remappedSiteStatsHash;
 };
 
 /**
@@ -34,13 +44,13 @@ const remap = (siteStatsHash) => {
  *   site stat details.
  */
 const findById = async (siteId, timestamp) => {
-  const client = redis.getClient();
+	const client = redis.getClient();
 
-  const response = await client.hgetallAsync(
-    keyGenerator.getSiteStatsKey(siteId, timestamp),
-  );
+	const response = await client.hgetallAsync(
+		keyGenerator.getSiteStatsKey(siteId, timestamp)
+	);
 
-  return (response ? remap(response) : response);
+	return response ? remap(response) : response;
 };
 
 /* eslint-disable no-unused-vars */
@@ -51,15 +61,18 @@ const findById = async (siteId, timestamp) => {
  * @param {Object} meterReading - a meter reading object.
  * @returns {Promise} - promise that resolves when the operation is complete.
  */
-const updateOptimized = async (meterReading) => {
-  const client = redis.getClient();
-  const key = keyGenerator.getSiteStatsKey(meterReading.siteId, meterReading.dateTime);
+const updateOptimized = async meterReading => {
+	const client = redis.getClient();
+	const key = keyGenerator.getSiteStatsKey(
+		meterReading.siteId,
+		meterReading.dateTime
+	);
 
-  // Load script if needed, uses cached SHA if already loaded.
-  await compareAndUpdateScript.load();
+	// Load script if needed, uses cached SHA if already loaded.
+	await compareAndUpdateScript.load();
 
-  // START Challenge #3
-  // END Challenge #3
+	// START Challenge #3
+	// END Challenge #3
 };
 /* eslint-enable */
 
@@ -71,40 +84,40 @@ const updateOptimized = async (meterReading) => {
  * @param {Object} meterReading - a meter reading object.
  * @returns {Promise} - promise that resolves when the operation is complete.
  */
-const updateBasic = async (meterReading) => {
-  const client = redis.getClient();
-  const key = keyGenerator.getSiteStatsKey(
-    meterReading.siteId,
-    meterReading.dateTime,
-  );
+const updateBasic = async meterReading => {
+	const client = redis.getClient();
+	const key = keyGenerator.getSiteStatsKey(
+		meterReading.siteId,
+		meterReading.dateTime
+	);
 
-  await client.hsetAsync(
-    key,
-    'lastReportingTime',
-    timeUtils.getCurrentTimestamp(),
-  );
-  await client.hincrbyAsync(key, 'meterReadingCount', 1);
-  await client.expireAsync(key, weekSeconds);
+	await client.hsetAsync(
+		key,
+		'lastReportingTime',
+		timeUtils.getCurrentTimestamp()
+	);
+	await client.hincrbyAsync(key, 'meterReadingCount', 1);
+	await client.expireAsync(key, weekSeconds);
 
-  const maxWh = await client.hgetAsync(key, 'maxWhGenerated');
-  if (maxWh === null || meterReading.whGenerated > parseFloat(maxWh)) {
-    await client.hsetAsync(key, 'maxWhGenerated', meterReading.whGenerated);
-  }
+	const maxWh = await client.hgetAsync(key, 'maxWhGenerated');
+	if (maxWh === null || meterReading.whGenerated > parseFloat(maxWh)) {
+		await client.hsetAsync(key, 'maxWhGenerated', meterReading.whGenerated);
+	}
 
-  const minWh = await client.hgetAsync(key, 'minWhGenerated');
-  if (minWh === null || meterReading.whGenerated < parseFloat(minWh)) {
-    await client.hsetAsync(key, 'minWhGenerated', meterReading.whGenerated);
-  }
+	const minWh = await client.hgetAsync(key, 'minWhGenerated');
+	if (minWh === null || meterReading.whGenerated < parseFloat(minWh)) {
+		await client.hsetAsync(key, 'minWhGenerated', meterReading.whGenerated);
+	}
 
-  const maxCapacity = await client.hgetAsync(key, 'maxCapacity');
-  const readingCapacity = meterReading.whGenerated - meterReading.whUsed;
-  if (maxCapacity === null || readingCapacity > parseFloat(maxCapacity)) {
-    await client.hsetAsync(key, 'maxCapacity', readingCapacity);
-  }
+	const maxCapacity = await client.hgetAsync(key, 'maxCapacity');
+	const readingCapacity = meterReading.whGenerated - meterReading.whUsed;
+	if (maxCapacity === null || readingCapacity > parseFloat(maxCapacity)) {
+		await client.hsetAsync(key, 'maxCapacity', readingCapacity);
+	}
 };
 /* eslint-enable */
 
 module.exports = {
-  findById,
-  update: updateBasic, // updateOptimized
+	findById,
+	update: updateOptimized,
 };

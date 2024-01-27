@@ -90,6 +90,7 @@ test(`${testSuiteName}: Test Redis Set`, async () => {
   // Read the set back from Redis and compare with a local set.
   const jsSet = new Set(testPlanets);
   const responseArray = await client.smembersAsync('planets');
+  
   const setFromRedis = new Set(responseArray);
 
   expect(setFromRedis.length).toBe(jsSet.length);
