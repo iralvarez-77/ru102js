@@ -110,26 +110,31 @@ const findById = async (id) => {
  */
 const findAll = async () => {
   const client = redis.getClient();
+  const pipeline = client.batch();
 
   const siteIds = await client.zrangeAsync(keyGenerator.getSiteGeoKey(), 0, -1);
   const sites = [];
 
-  for (const siteId of siteIds) {
-    const siteKey = keyGenerator.getSiteHashKey(siteId);
+  // OPTIONAL BONUS CHALLENGE: Optimize with a pipeline.
+    for (const siteId of siteIds) {
+      pipeline.hgetall(keyGenerator.getSiteHashKey(siteId));
+    }
 
-    /* eslint-disable no-await-in-loop */
-    const siteHash = await client.hgetallAsync(siteKey);
-    /* eslint-enable */
+    // Get all of the site hashes in a single round trip.
+    const siteHashes = await pipeline.execAsync();
 
-    if (siteHash) {
+    for (const siteHash of siteHashes) {
       // Call remap to remap the flat key/value representation
       // from the Redis hash into the site domain object format.
       sites.push(remap(siteHash));
     }
-  }
-
+  
+  // END OPTIONAL BONUS CHALLENGE
   return sites;
 };
+
+
+
 
 /**
  * Get an array of sites within a radius of a given coordinate.

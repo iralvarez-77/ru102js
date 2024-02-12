@@ -118,28 +118,28 @@ test(`${testSuiteName}: getReport`, async () => {
 });
 
 // This test is for Challenge #4.
-test.skip(`${testSuiteName}: getRank`, async () => {
+test(`${testSuiteName}: getRank`, async () => {
   // Create some data
   const entries = [
     {
       id: 1,
-      score: 10,
+      score: 10, // 4
     },
     {
       id: 2,
-      score: 15,
+      score: 15, // 3
     },
     {
       id: 3,
-      score: 30,
+      score: 30, // 1
     },
     {
       id: 4,
-      score: 20,
+      score: 20, // 2
     },
     {
       id: 5,
-      score: 50,
+      score: 50, // 0
     },
   ];
 

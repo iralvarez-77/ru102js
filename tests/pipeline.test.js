@@ -38,6 +38,7 @@ test(`${testSuiteName}: example command pipeline`, async () => {
   pipeline.sadd(testKey2, 1);
 
   const responses = await pipeline.execAsync();
+  console.log('👀 👉🏽 ~  responses:', responses)
 
   expect(responses).toHaveLength(3);
   expect(responses[0]).toBe(1);
