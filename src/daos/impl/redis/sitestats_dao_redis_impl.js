@@ -73,8 +73,6 @@ const updateOptimized = async meterReading => {
 
 	// START Challenge #3
   const transaction = client.multi();
-  
-  
 
   transaction.hset(key, 'lastReportingTime', timeUtils.getCurrentTimestamp());
   transaction.hincrby(key, 'meterReadingCount', 1);
